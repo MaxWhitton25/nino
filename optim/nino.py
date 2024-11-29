@@ -152,7 +152,7 @@ class NiNo:
             self.graph.visualize()
 
     def get_k(self, step=None):
-        return 200
+        return 2
         idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
         return self._k_schedule[idx]
 
@@ -228,6 +228,7 @@ class NiNo:
                         print('running the meta model', flush=True)
                     if nino_fw_device is not None:
                         self.meta_model = self.meta_model.to(nino_fw_device)
+                    
                     self.graph.pyg_graph = self.meta_model(self.graph.pyg_graph.to(self.nino_device), k=k)
                     if self.graph.pyg_graph.edge_attr.shape[-1] != 1:
                         print('\nWARNING: edge_attr.shape[-1] != 1', self.graph.pyg_graph.edge_attr.shape)
