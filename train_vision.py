@@ -116,7 +116,7 @@ def main():
                      period=args.period,
                      max_train_steps=args.max_train_steps,
                      verbose=args.verbose)
-    print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k} on each prediction!")
+    print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k()} on each prediction!")
 
     def save(step_idx=None):
         if args.output_dir not in [None, '', 'None', 'none']:
@@ -164,6 +164,7 @@ def main():
                 return
 
     epochs = int(np.ceil(args.max_train_steps / len(train_loader)))
+    
     losses = []
     start_time = time.time()
     done = False
@@ -220,6 +221,7 @@ def main():
         resume_step = 0  # reset the start step for the next epoch
         if done:
             break
+    print("WE SHOULD BE DONE TRAINING< WHY IS IT GOING AGAIN???")
     save(optimizer.step_idx)  # save the final model
 
 if __name__ == '__main__':
