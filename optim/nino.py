@@ -152,6 +152,7 @@ class NiNo:
             self.graph.visualize()
 
     def get_k(self, step=None):
+        return 200
         idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
         return self._k_schedule[idx]
 
@@ -198,8 +199,7 @@ class NiNo:
             else:
                 loss = None
 
-            if k is None:
-                k = self.get_k()
+            k = self.get_k()
             if self.verbose:
                 if torch.cuda.is_available() and self.nino_device != 'cpu':
                     torch.cuda.reset_peak_memory_stats(self.nino_device)
