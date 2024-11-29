@@ -67,7 +67,6 @@ def parse_args():
 
 
 def main():
-
     args = parse_args()
     device = args.device
     try:
@@ -117,6 +116,7 @@ def main():
                      period=args.period,
                      max_train_steps=args.max_train_steps,
                      verbose=args.verbose)
+    print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k} on each prediction!")
 
     def save(step_idx=None):
         if args.output_dir not in [None, '', 'None', 'none']:
