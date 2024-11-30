@@ -242,7 +242,7 @@ class NiNo:
                             raise ValueError('NaNs in the predicted parameters')
                         x = unscale_params(x, self._model_dict, scales, method=self.meta_model.scale_method)
 
-                    self.states = []
+                    # self.states = []
 
                 if self.verbose:
                     print('NiNo step finished: {:.3f} sec, peak mem on {}={:.3f}G, cpu={:.3f}G\n'.format(
@@ -251,6 +251,10 @@ class NiNo:
                         mem(device),
                         mem('cpu')),
                         flush=True)
+                # Backup original model parameters
+                original_params = []
+                for p in self._model.parameters():
+                    original_params.append(p.clone())
 
                 # set the predicted values as the new parameters
                 i = 0
@@ -258,6 +262,14 @@ class NiNo:
                     n = p.numel()
                     p.data = x[i: i + n].data.view_as(p).to(p)
                     i += n
+                    
+                # Restore the original model parameters
+                i = 0
+                for p, original_p in zip(self._model.parameters(), original_params):
+                    n = p.numel()
+                    p.data = original_p.data.view_as(p).to(p)
+                    i += n
+
 
                 if closure is not None:
                     loss = closure()
@@ -275,7 +287,7 @@ class NiNo:
                 i += n
             if self.verbose:
                 print("Parameters updated!")
-
+            self.states = []
         else:
             # make sure to compute grads for this step
             loss = self.base_opt.step(closure)
