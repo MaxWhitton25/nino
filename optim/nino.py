@@ -203,7 +203,8 @@ class NiNo:
             losses = []
             best_x = None
             best_k = 0
-            k_to_try = [1, 20, 40]
+            
+            k_to_try = [1, 3, 5, 8, 11, 16, 21, 26, 33, 40]
             for k in k_to_try:
                 if self.verbose:
                     if torch.cuda.is_available() and self.nino_device != 'cpu':
@@ -245,7 +246,7 @@ class NiNo:
                     # self.states = []
 
                 if self.verbose:
-                    print('NiNo step finished: {:.3f} sec, peak mem on {}={:.3f}G, cpu={:.3f}G\n'.format(
+                    print('NiNo step finished: {:.3f} sec, peak mem on {}={:.3f}G, cpu={:.3f}G'.format(
                         time.time() - start_time,
                         device,
                         mem(device),
@@ -279,9 +280,9 @@ class NiNo:
                     print(f"{loss.item()} was better than {best_loss}")
                     best_loss = loss.item()
                     best_x = x
-                    best_k = 0
+                    best_k = k
                 else:
-                    print(f"{loss.item()} was not better than {best_loss}")
+                    print(f"{loss.item()} was not better than {best_loss}\n")
             if self.verbose:
                 print(f'We tried Nino steps for k = {k_to_try} and got losses after of {losses}. The best of these was k = {best_k} with loss {best_loss}, so we will use these parameters.')
             i = 0
