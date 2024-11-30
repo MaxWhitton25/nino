@@ -273,12 +273,15 @@ class NiNo:
 
                 if closure is not None:
                     loss = closure()
-                    
-                losses.append(loss)
+                print('loss after NiNo step: %.4f' % loss.item(), flush=True)   
+                losses.append(loss.item())
                 if loss.item() < best_loss:
+                    print(f"{loss.item()} was better than {best_loss}")
                     best_loss = loss.item()
                     best_x = x
                     best_k = 0
+                else:
+                    print(f"{loss.item()} was not better than {best_loss}")
             if self.verbose:
                 print(f'We tried Nino steps for k = {k_to_try} and got losses after of {losses}. The best of these was k = {best_k} with loss {best_loss}, so we will use these parameters.')
             i = 0
