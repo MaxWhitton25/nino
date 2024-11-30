@@ -63,7 +63,9 @@ class NiNo:
         self.max_train_steps = max_train_steps
         self.amp = amp
         self.meta_model = None
-
+        self.period_schedule = [200, 300, 400, 400, 500, 700,  1000, 1500, 2000, 3000]
+        self.period_i = 0
+        self.last_nino = 0
         # if ckpt is None, use the base optimizer only
         # otherwise, load the NiNo model and initialize the graph
         if ckpt not in [None, 'none', 'None', '']:
@@ -100,6 +102,7 @@ class NiNo:
                 self.set_model(model)
             else:
                 self._model = None
+            
 
     def set_model(self, model, lpe=None, **kwargs):
         """
@@ -170,12 +173,16 @@ class NiNo:
     def need_grads(self):
         return not self.next_step_nino
 
+    def get_period(self):
+        self.period = self.period_schedule[min(self.period_i, 9)]
+        return
+    
     def step(self, closure=None, k=None, nino_fw_device=None):
-
+        self.get_period()
         if self.meta_model:
             device = nino_fw_device if nino_fw_device is not None else self.nino_device
 
-        if self.meta_model and (self.step_idx + 1) % (self.period // self.ctx) == 0:
+        if self.meta_model and (self.step_idx + 1 - self.last_nino) % (self.period // self.ctx) == 0:
             # get parameters from the model as a concatenated tensor
             # add params to the list of states
             self.states.append(torch.cat([p.data.view(-1).to(self.nino_device)
@@ -190,7 +197,8 @@ class NiNo:
 
         if self.meta_model and len(self.states) == self.ctx:
             # gradients are not needed for this step (can omit loss.backward())
-
+            self.period_i+=1
+            self.last_nino = self.step_idx
             if closure is not None:
                 loss = closure()
                 if self.verbose:
