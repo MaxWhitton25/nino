@@ -221,7 +221,6 @@ def main():
         resume_step = 0  # reset the start step for the next epoch
         if done:
             break
-    print("WE SHOULD BE DONE TRAINING< WHY IS IT GOING AGAIN???")
     save(optimizer.step_idx)  # save the final model
 
 if __name__ == '__main__':

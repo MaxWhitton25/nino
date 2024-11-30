@@ -152,7 +152,6 @@ class NiNo:
             self.graph.visualize()
 
     def get_k(self, step=None):
-        return 2
         idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
         return self._k_schedule[idx]
 
@@ -200,64 +199,82 @@ class NiNo:
                 loss = None
 
             k = self.get_k()
-            if self.verbose:
-                if torch.cuda.is_available() and self.nino_device != 'cpu':
-                    torch.cuda.reset_peak_memory_stats(self.nino_device)
-                    torch.cuda.synchronize()
-                print('\nNiNo step starting at step {} (k={}): peak mem on {}={:.3f}G, cpu={:.3f}G'.format(
-                    self.step_idx + 1,
-                    k,
-                    device,
-                    mem(device),
-                    mem('cpu')), flush=True)
-                start_time = time.time()
+            best_loss = 10
+            losses = []
+            best_x = None
+            best_k = 0
+            k_to_try = [1, 20, 40]
+            for k in k_to_try:
+                if self.verbose:
+                    if torch.cuda.is_available() and self.nino_device != 'cpu':
+                        torch.cuda.reset_peak_memory_stats(self.nino_device)
+                        torch.cuda.synchronize()
+                    print('\nNiNo step starting at step {} (k={}): peak mem on {}={:.3f}G, cpu={:.3f}G'.format(
+                        self.step_idx + 1,
+                        k,
+                        device,
+                        mem(device),
+                        mem('cpu')), flush=True)
+                    start_time = time.time()
 
-            with torch.no_grad():
-                # prediction step
-                with torch.autocast(device_type='cpu' if self.nino_device == 'cpu' else 'cuda',
-                                    enabled=self.amp,
-                                    dtype=torch.bfloat16):
-                    # using AMP can save memory but may lead to NaNs in the predicted parameters
+                with torch.no_grad():
+                    # prediction step
+                    with torch.autocast(device_type='cpu' if self.nino_device == 'cpu' else 'cuda',
+                                        enabled=self.amp,
+                                        dtype=torch.bfloat16):
+                        # using AMP can save memory but may lead to NaNs in the predicted parameters
 
-                    states = torch.stack(self.states, dim=1)
-                    states, scales = scale_params(states, self._model_dict, method=self.meta_model.scale_method)
-                    if torch.cuda.is_available():
-                        torch.cuda.empty_cache()
-                    self.graph.set_edge_attr(states)
-                    if self.verbose:
-                        print('running the meta model', flush=True)
-                    if nino_fw_device is not None:
-                        self.meta_model = self.meta_model.to(nino_fw_device)
+                        states = torch.stack(self.states, dim=1)
+                        states, scales = scale_params(states, self._model_dict, method=self.meta_model.scale_method)
+                        if torch.cuda.is_available():
+                            torch.cuda.empty_cache()
+                        self.graph.set_edge_attr(states)
+                        if self.verbose:
+                            print('running the meta model', flush=True)
+                        if nino_fw_device is not None:
+                            self.meta_model = self.meta_model.to(nino_fw_device)
+                        
+                        self.graph.pyg_graph = self.meta_model(self.graph.pyg_graph.to(self.nino_device), k=k)
+                        if self.graph.pyg_graph.edge_attr.shape[-1] != 1:
+                            print('\nWARNING: edge_attr.shape[-1] != 1', self.graph.pyg_graph.edge_attr.shape)
+                        x = self.graph.to_vector()
+                        if torch.isnan(x).any():
+                            raise ValueError('NaNs in the predicted parameters')
+                        x = unscale_params(x, self._model_dict, scales, method=self.meta_model.scale_method)
+
+                    self.states = []
+
+                if self.verbose:
+                    print('NiNo step finished: {:.3f} sec, peak mem on {}={:.3f}G, cpu={:.3f}G\n'.format(
+                        time.time() - start_time,
+                        device,
+                        mem(device),
+                        mem('cpu')),
+                        flush=True)
+
+                # set the predicted values as the new parameters
+                i = 0
+                for p in self._model.parameters():
+                    n = p.numel()
+                    p.data = x[i: i + n].data.view_as(p).to(p)
+                    i += n
+
+                if closure is not None:
+                    loss = closure()
                     
-                    self.graph.pyg_graph = self.meta_model(self.graph.pyg_graph.to(self.nino_device), k=k)
-                    if self.graph.pyg_graph.edge_attr.shape[-1] != 1:
-                        print('\nWARNING: edge_attr.shape[-1] != 1', self.graph.pyg_graph.edge_attr.shape)
-                    x = self.graph.to_vector()
-                    if torch.isnan(x).any():
-                        raise ValueError('NaNs in the predicted parameters')
-                    x = unscale_params(x, self._model_dict, scales, method=self.meta_model.scale_method)
-
-                self.states = []
-
+                losses.append(loss)
+                if loss < best_loss:
+                    best_loss = loss
+                    best_x = x
+                    best_k = 0
             if self.verbose:
-                print('NiNo step finished: {:.3f} sec, peak mem on {}={:.3f}G, cpu={:.3f}G\n'.format(
-                    time.time() - start_time,
-                    device,
-                    mem(device),
-                    mem('cpu')),
-                    flush=True)
-
-            # set the predicted values as the new parameters
-            i = 0
+                print(f'We tried Nino steps for k = {k_to_try} and got losses after of {losses}. The best of these was k = {best_k} with loss {best_loss}, so we will use these parameters.')
             for p in self._model.parameters():
                 n = p.numel()
-                p.data = x[i: i + n].data.view_as(p).to(p)
+                p.data = best_x[i: i + n].data.view_as(p).to(p)
                 i += n
-
-            if closure is not None:
-                loss = closure()
-                if self.verbose:
-                    print('loss after NiNo step: %.4f' % loss.item(), flush=True)
+            if self.verbose:
+                print("Parameters updated!")
 
         else:
             # make sure to compute grads for this step
