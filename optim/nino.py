@@ -262,7 +262,7 @@ class NiNo:
                     n = p.numel()
                     p.data = x[i: i + n].data.view_as(p).to(p)
                     i += n
-                    
+
                 # Restore the original model parameters
                 i = 0
                 for p, original_p in zip(self._model.parameters(), original_params):
@@ -275,12 +275,13 @@ class NiNo:
                     loss = closure()
                     
                 losses.append(loss)
-                if loss < best_loss:
-                    best_loss = loss
+                if loss.item() < best_loss:
+                    best_loss = loss.item()
                     best_x = x
                     best_k = 0
             if self.verbose:
                 print(f'We tried Nino steps for k = {k_to_try} and got losses after of {losses}. The best of these was k = {best_k} with loss {best_loss}, so we will use these parameters.')
+            i = 0
             for p in self._model.parameters():
                 n = p.numel()
                 p.data = best_x[i: i + n].data.view_as(p).to(p)
