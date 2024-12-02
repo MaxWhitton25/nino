@@ -205,7 +205,7 @@ class NiNo:
                     print('loss before NiNo step: %.4f' % loss.item(), flush=True)
             else:
                 loss = None
-
+            k = self._k_schedule[self.period_i]
             if k is None:
                 k = self.get_k()
             if self.verbose:
