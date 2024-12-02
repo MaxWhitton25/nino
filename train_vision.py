@@ -27,6 +27,7 @@ from optim import NiNo
 from utils import set_seed, Net, VISION_TASKS, mem, get_env_args
 import matplotlib.pyplot as plt
 
+
 def test(model, data, target, verbose=0):
     model.eval()
     with torch.no_grad():
@@ -222,6 +223,7 @@ def main():
         if done:
             break
     # added by max to visualize
+    
     steps = [i + 1 for i in range(len(losses))]
     plt.figure(figsize=(8, 5))
     plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
@@ -230,7 +232,8 @@ def main():
     plt.legend()
     plt.grid(True)
     plt.show()
-    
+    plt.savefig('loss_plot.png') 
+
     save(optimizer.step_idx)  # save the final model
 
 if __name__ == '__main__':
