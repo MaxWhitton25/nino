@@ -25,7 +25,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from optim import NiNo
 from utils import set_seed, Net, VISION_TASKS, mem, get_env_args
-
+import matplotlib.pyplot as plt
 
 def test(model, data, target, verbose=0):
     model.eval()
@@ -221,6 +221,16 @@ def main():
         resume_step = 0  # reset the start step for the next epoch
         if done:
             break
+    # added by max to visualize
+    steps = [i + 1 for i in range(len(losses))]
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
+    plt.xlabel('Step Number')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    
     save(optimizer.step_idx)  # save the final model
 
 if __name__ == '__main__':
