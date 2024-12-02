@@ -63,7 +63,7 @@ class NiNo:
         self.max_train_steps = max_train_steps
         self.amp = amp
         self.meta_model = None
-        self.period_schedule = [100, 200, 400, 800, 1600]
+        self.period_schedule = [100, 200, 400, 800, 1600, 3200, 6400]
         self.period_i = 0
         self.last_nino = 0
         # if ckpt is None, use the base optimizer only
