@@ -225,6 +225,7 @@ def main():
     # added by max to visualize
     
     steps = [i + 1 for i in range(len(losses))]
+   
     plt.figure(figsize=(8, 5))
     plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
     plt.xlabel('Step Number')
@@ -235,8 +236,18 @@ def main():
     plt.savefig('loss_plot.png') 
 
     save(optimizer.step_idx)  # save the final model
-
+    return losses
 if __name__ == '__main__':
-    main()
+    losses = main()
+    steps = [i + 1 for i in range(len(losses))]
+   
+    plt.figure(figsize=(8, 5))
+    plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
+    plt.xlabel('Step Number')
+    plt.ylabel('Loss')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+    plt.savefig('loss_plot.png') 
     print('Done!')
     
