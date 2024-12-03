@@ -230,7 +230,7 @@ if __name__ == '__main__':
     losses = main()
     steps = [i + 1 for i in range(len(losses))]
     df = pd.DataFrame({'Epochs': steps, 'Losses': losses})
-    df.to_csv('dynamic.csv', index=False)
+    df.to_csv('default.csv', index=False)
     plt.figure(figsize=(8, 5))
     plt.plot([1, 2, 3], [4, 5, 6])
     # plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
