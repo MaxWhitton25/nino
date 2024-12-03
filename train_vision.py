@@ -168,6 +168,7 @@ def main():
     epochs = int(np.ceil(args.max_train_steps / len(train_loader)))
     
     losses = []
+    val_acc = []
     start_time = time.time()
     done = False
     print(f'\nTraining {args.task} with {len(train_loader)} batches per epoch for {epochs} epochs')
@@ -223,14 +224,19 @@ def main():
         resume_step = 0  # reset the start step for the next epoch
         if done:
             break
+        val_acc.append(scores['acc'])
 
     save(optimizer.step_idx)  # save the final model
     return losses
 if __name__ == '__main__':
     losses = main()
     steps = [i + 1 for i in range(len(losses))]
+
     df = pd.DataFrame({'Epochs': steps, 'Losses': losses})
     df.to_csv('default.csv', index=False)
+    val = pd.DataFrame({'Epochs': steps, 'Losses': losses})
+    df.to_csv('valdefault.csv', index=False)
+
     plt.figure(figsize=(8, 5))
     plt.plot([1, 2, 3], [4, 5, 6])
     # plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
