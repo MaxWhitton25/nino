@@ -71,7 +71,7 @@ class NiNo:
         elif period_type == 'short':
             self.period_schedule = [100]*100
         elif period_type== 'medium':
-            self.period_schedule = [500]*1000
+            self.period_schedule = [400]*1000
         
         self.period_i = 0
         self.last_nino = 0
