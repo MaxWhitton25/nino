@@ -67,7 +67,7 @@ class NiNo:
         if period_type == 'long':
             self.period_schedule = [1000]*100
         elif period_type == 'dynamic':
-            self.period_schedule = [200, 300, 400, 400, 500, 700,  1000, 1500, 2000, 3000]
+            self.period_schedule = [200, 300, 300, 400, 400, 500, 700, 1500, 2000, 3000]
         elif period_type == 'short':
             self.period_schedule = [200]*100
         elif period_type== 'medium':
