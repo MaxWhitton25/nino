@@ -67,9 +67,9 @@ class NiNo:
         if period_type == 'long':
             self.period_schedule = [1000]*100
         elif period_type == 'dynamic':
-            self.period_schedule = [200, 300, 300, 400, 400, 500, 700, 1500, 2000, 3000]
+            self.period_schedule = [100, 100, 100, 100, 100, 100, 200, 200, 300, 300, 400]#[200, 300, 300, 400, 400, 500, 700, 1500, 2000, 3000]
         elif period_type == 'short':
-            self.period_schedule = [200]*100
+            self.period_schedule = [100]*100
         elif period_type== 'medium':
             self.period_schedule = [500]*1000
         
@@ -216,9 +216,8 @@ class NiNo:
                     print('loss before NiNo step: %.4f' % loss.item(), flush=True)
             else:
                 loss = None
-            k = self._k_schedule[min(self.period_i, 9)]
-            if k is None:
-                k = self.get_k()
+            
+            k = self.get_k()
             if self.verbose:
                 if torch.cuda.is_available() and self.nino_device != 'cpu':
                     torch.cuda.reset_peak_memory_stats(self.nino_device)
