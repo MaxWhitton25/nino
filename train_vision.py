@@ -223,10 +223,11 @@ def main():
                 done = True
             if done:
                 break
+            val_acc.append(scores['acc'])
         resume_step = 0  # reset the start step for the next epoch
         if done:
             break
-        val_acc.append(scores['acc'])
+        
 
     save(optimizer.step_idx)  # save the final model
     return losses, val_acc, args.period_type
