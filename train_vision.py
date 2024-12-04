@@ -120,7 +120,7 @@ def main():
                      max_train_steps=args.max_train_steps,
                      verbose=args.verbose,
                      period_type = args.period_type)
-    print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k()} on each prediction!")
+    # print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k()} on each prediction!")
 
     def save(step_idx=None):
         if args.output_dir not in [None, '', 'None', 'none']:
