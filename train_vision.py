@@ -232,11 +232,12 @@ def main():
     return losses, val_acc, args.period_type
 if __name__ == '__main__':
     losses, val_acc, type = main()
-    steps = [i + 1 for i in range(len(losses))]
+    lsteps = [i + 1 for i in range(len(losses))]
+    vsteps = [i + 1 for i in range(len(val_acc))]
 
-    loss = pd.DataFrame({'Epochs': steps, 'Training Loss': losses})
+    loss = pd.DataFrame({'Epochs': lsteps, 'Training Loss': losses})
     loss.to_csv(f'{type}_loss.csv', index=False)
-    val = pd.DataFrame({'Epochs': steps, 'Validation Accuracy': val_acc})
+    val = pd.DataFrame({'Epochs': vsteps, 'Validation Accuracy': val_acc})
     val.to_csv(f'{type}_val.csv', index=False)
 
     print('Done!')
