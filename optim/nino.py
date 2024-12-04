@@ -166,7 +166,7 @@ class NiNo:
 
     def get_k(self, step=None):
         idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
-        idx = min(idx, len(self._k_schedule))
+        idx = min(idx, len(self._k_schedule)-1)
         return self._k_schedule[idx]
 
     def state_dict(self):
