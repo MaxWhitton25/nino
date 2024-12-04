@@ -63,6 +63,7 @@ def parse_args():
     parser.add_argument('--verbose', type=int, default=1)
     parser.add_argument('--log_interval', type=int, default=100,
                         help='how many batches to wait before logging training status')
+    parser.add_argument('--period_type', type=str, default='long')
     args = parser.parse_args()
     args = get_env_args(args)
     return args
@@ -117,7 +118,8 @@ def main():
                      model=model,
                      period=args.period,
                      max_train_steps=args.max_train_steps,
-                     verbose=args.verbose)
+                     verbose=args.verbose,
+                     period_type = args.period_type)
     print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k()} on each prediction!")
 
     def save(step_idx=None):
@@ -227,24 +229,15 @@ def main():
         val_acc.append(scores['acc'])
 
     save(optimizer.step_idx)  # save the final model
-    return losses
+    return losses, val_acc, args.period_type
 if __name__ == '__main__':
-    losses = main()
+    losses, val_acc, type = main()
     steps = [i + 1 for i in range(len(losses))]
 
-    df = pd.DataFrame({'Epochs': steps, 'Losses': losses})
-    df.to_csv('default.csv', index=False)
-    val = pd.DataFrame({'Epochs': steps, 'Losses': losses})
-    df.to_csv('valdefault.csv', index=False)
+    loss = pd.DataFrame({'Epochs': steps, 'Training Loss': losses})
+    loss.to_csv(f'{type}_loss.csv', index=False)
+    val = pd.DataFrame({'Epochs': steps, 'Validation Accuracy': val_acc})
+    val.to_csv(f'{type}_val.csv', index=False)
 
-    plt.figure(figsize=(8, 5))
-    plt.plot([1, 2, 3], [4, 5, 6])
-    # plt.plot(steps, losses, marker='o', linestyle='-', color='b', label='Loss')
-    plt.xlabel('Step Number')
-    plt.ylabel('Loss')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
-    plt.savefig('loss_plot.png') 
     print('Done!')
     

@@ -38,6 +38,7 @@ class NiNo:
                  max_train_steps: Optional[int] = 10000,
                  amp: Optional[bool] = False,
                  p: Optional[float] = 2.,
+                 period_type: Optional[str] = "long",
                  **kwargs):
         """
 
@@ -63,7 +64,15 @@ class NiNo:
         self.max_train_steps = max_train_steps
         self.amp = amp
         self.meta_model = None
-        self.period_schedule = [1000]*100#[200, 300, 400, 400, 500, 700,  1000, 1500, 2000, 3000]
+        if period_type == 'long':
+            self.period_schedule = [1000]*100
+        elif period_type == 'dynamic':
+            self.period_schedule = [200, 300, 400, 400, 500, 700,  1000, 1500, 2000, 3000]
+        elif period_type == 'short':
+            self.period_schedule = [200]*100
+        elif period_type== 'medium':
+            self.period_schedule = [500]*1000
+        
         self.period_i = 0
         self.last_nino = 0
         # if ckpt is None, use the base optimizer only
