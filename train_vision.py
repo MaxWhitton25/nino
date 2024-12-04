@@ -63,7 +63,7 @@ def parse_args():
     parser.add_argument('--verbose', type=int, default=1)
     parser.add_argument('--log_interval', type=int, default=100,
                         help='how many batches to wait before logging training status')
-    parser.add_argument('--period_type', type=str, default='long')
+    parser.add_argument('--period_type', type=str, default=None)
     args = parser.parse_args()
     args = get_env_args(args)
     return args
