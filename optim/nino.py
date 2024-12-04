@@ -67,7 +67,7 @@ class NiNo:
         if period_type == 'long':
             self.period_schedule = [1000]*100
         elif period_type == 'dynamic':
-            self.period_schedule = [200, 300, 300, 400, 800, 800, 800, 1500, 2000, 3000]
+            self.period_schedule = [100,100,100,100,100,100,200,400, 800, 800, 800] #[200, 300, 300, 400, 800, 800, 800, 1500, 2000, 3000]
         elif period_type == 'short':
             self.period_schedule = [100]*100
         elif period_type== 'medium':
@@ -165,7 +165,7 @@ class NiNo:
             self.graph.visualize()
 
     def get_k(self, step=None):
-        idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
+        idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // 500)
         idx = min(idx, len(self._k_schedule)-1)
         return self._k_schedule[idx]
 
