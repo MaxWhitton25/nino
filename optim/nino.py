@@ -105,8 +105,7 @@ class NiNo:
             self._k_schedule = (np.linspace(self.meta_model.seq_len ** (1 / p),
                                             1,
                                             num=max(1, self.max_train_steps // self.period)) ** p).round().astype(np.int32)
-            for _ in range(100):
-                self._k_schedule.append(1)
+            
             if self.verbose:
                 print(f'\nk_schedule values (direct multi-step forecasting) = {self._k_schedule}')
             if model is not None:
@@ -167,6 +166,7 @@ class NiNo:
 
     def get_k(self, step=None):
         idx = min(len(self._k_schedule) - 1, (self.step_idx if step is None else step) // self.period)
+        idx = min(idx, len(self._k_schedule))
         return self._k_schedule[idx]
 
     def state_dict(self):
