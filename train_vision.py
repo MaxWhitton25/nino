@@ -120,7 +120,7 @@ def main():
                      max_train_steps=args.max_train_steps,
                      verbose=args.verbose,
                      period_type = args.period_type)
-    # print(f"Welcome to training vision! The context length, which should be 5, is {optimizer.ctx}, and we will nowcast {optimizer.get_k()} on each prediction!")
+    print(f"Welcome to training vision! The task is {task['dataset']} and the period type is {args.period_type}!")
 
     def save(step_idx=None):
         if args.output_dir not in [None, '', 'None', 'none']:
@@ -202,12 +202,12 @@ def main():
 
             scores = test(model, data_eval, target_eval, verbose=args.verbose)
 
-            if optimizer.step_idx % args.log_interval == 0:
-                print('Train {:04d}/{}: \tTrain loss: {:.4f} \tVal loss: {:.4f} \tVal acc: {:.2f}% '
-                      '\t(sec/b={:.3f}, {}={:.3f}G)'.format(
-                    optimizer.step_idx,
-                    args.max_train_steps, losses[-1], scores['loss'], scores['acc'],
-                    (time.time() - start_time) / optimizer.step_idx, device, mem(device)))
+            # if optimizer.step_idx % args.log_interval == 0:
+            #     print('Train {:04d}/{}: \tTrain loss: {:.4f} \tVal loss: {:.4f} \tVal acc: {:.2f}% '
+            #           '\t(sec/b={:.3f}, {}={:.3f}G)'.format(
+            #         optimizer.step_idx,
+            #         args.max_train_steps, losses[-1], scores['loss'], scores['acc'],
+            #         (time.time() - start_time) / optimizer.step_idx, device, mem(device)))
 
             if args.checkpointing_steps is not None and optimizer.step_idx % args.checkpointing_steps == 0:
                 save(optimizer.step_idx)  # save the model every args.checkpointing_steps steps
