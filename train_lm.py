@@ -382,6 +382,7 @@ def parse_args():
             "If passed, LLM loading time and RAM consumption will be benefited."
         ),
     )
+    parser.add_argument('--period_type', type=str, default=None)
     args = parser.parse_args()
 
     # Sanity checks
@@ -743,6 +744,7 @@ def main():
                      ckpt=args.nino_ckpt,
                      model=model,
                      period=args.period,
+                     period_type=args.period_type,
                      max_train_steps=args.max_train_steps,
                      nino_device=args.nino_device,
                      message_passing_device=args.nino_mp_device,
@@ -750,6 +752,7 @@ def main():
                      p=args.k_decay,
                      upd_scale=args.upd_scale,
                      verbose=args.verbose)  # haven't tested with distributed training
+    print(f"Welcome to training language! The period type is {args.period_type}!")
 
     if args.output_dir is not None:
         checkpoint_last = os.path.join(args.output_dir,
